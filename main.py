@@ -22,12 +22,12 @@ for i in range(3):
 # Game logic
 current_player = "X"
 moves = 0
-scores = {"X": -1, "O": 1, "tie": 0}
+scores = {"X": -10, "O": 10, "tie": 0}
 
-def minimax(board, depth, isMaximizing):
+def minimax(board, depth, isMaximizing, alpha, beta):
     winner = check_win()
-    if winner != None:
-        return scores[winner] * (10 - depth)
+    if winner:
+        return scores[winner]
 
     if isMaximizing:
         bestScore = float('-inf')
@@ -35,10 +35,14 @@ def minimax(board, depth, isMaximizing):
             for j in range(3):
                 if board[i][j]["text"] == "":
                     board[i][j]["text"] = "O"
-                    score = minimax(board, depth + 1, False)
+                    score = minimax(board, depth + 1, False, alpha, beta)
                     board[i][j]["text"] = ""
-                    if score > bestScore:
-                        bestScore = score
+                    bestScore = max(score, bestScore)
+                    alpha = max(alpha, score)
+                    if beta <= alpha:
+                        break
+            if beta <= alpha:
+                break
         return bestScore
     else:
         bestScore = float('inf')
@@ -46,10 +50,14 @@ def minimax(board, depth, isMaximizing):
             for j in range(3):
                 if board[i][j]["text"] == "":
                     board[i][j]["text"] = "X"
-                    score = minimax(board, depth + 1, True)
+                    score = minimax(board, depth + 1, True, alpha, beta)
                     board[i][j]["text"] = ""
-                    if score < bestScore:
-                        bestScore = score
+                    bestScore = min(score, bestScore)
+                    beta = min(beta, score)
+                    if beta <= alpha:
+                        break
+            if beta <= alpha:
+                break
         return bestScore
 
 def button_click(row, col):
@@ -71,7 +79,7 @@ def button_click(row, col):
                     for j in range(3):
                         if buttons[i][j]["text"] == "":
                             buttons[i][j]["text"] = "O"
-                            score = minimax(buttons, 0, False)
+                            score = minimax(buttons, 0, False, float('-inf'), float('inf'))  # Add missing arguments
                             buttons[i][j]["text"] = ""
                             if score > bestScore:
                                 bestScore = score
