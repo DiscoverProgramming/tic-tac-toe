@@ -22,6 +22,35 @@ for i in range(3):
 # Game logic
 current_player = "X"
 moves = 0
+scores = {"X": -1, "O": 1, "tie": 0}
+
+def minimax(board, depth, isMaximizing):
+    winner = check_win()
+    if winner != None:
+        return scores[winner] * (10 - depth)
+
+    if isMaximizing:
+        bestScore = float('-inf')
+        for i in range(3):
+            for j in range(3):
+                if board[i][j]["text"] == "":
+                    board[i][j]["text"] = "O"
+                    score = minimax(board, depth + 1, False)
+                    board[i][j]["text"] = ""
+                    if score > bestScore:
+                        bestScore = score
+        return bestScore
+    else:
+        bestScore = float('inf')
+        for i in range(3):
+            for j in range(3):
+                if board[i][j]["text"] == "":
+                    board[i][j]["text"] = "X"
+                    score = minimax(board, depth + 1, True)
+                    board[i][j]["text"] = ""
+                    if score < bestScore:
+                        bestScore = score
+        return bestScore
 
 def button_click(row, col):
     global current_player, moves
@@ -31,45 +60,60 @@ def button_click(row, col):
         if current_player == "X":
             button.config(fg="red", font=("Arial", 9, "bold"))
             current_player = "O"
+            moves += 1
+            winner = check_win()
+            if winner:
+                show_win_screen(winner)
+            elif moves < 9:
+                bestScore = float('-inf')
+                bestMove = None
+                for i in range(3):
+                    for j in range(3):
+                        if buttons[i][j]["text"] == "":
+                            buttons[i][j]["text"] = "O"
+                            score = minimax(buttons, 0, False)
+                            buttons[i][j]["text"] = ""
+                            if score > bestScore:
+                                bestScore = score
+                                bestMove = (i, j)
+                button_click(bestMove[0], bestMove[1])
         else:
             button.config(fg="blue", font=("Arial", 9, "bold"))
             current_player = "X"
-        moves += 1
-        check_win()
+            moves += 1
+            winner = check_win()
+            if winner:
+                show_win_screen(winner)
 
 def check_win():
     # Check rows
     for i in range(3):
         if buttons[i][0]["text"] == buttons[i][1]["text"] == buttons[i][2]["text"] != "":
-            show_win_screen(buttons[i][0]["text"])
-            return
+            return buttons[i][0]["text"]
 
     # Check columns
     for j in range(3):
         if buttons[0][j]["text"] == buttons[1][j]["text"] == buttons[2][j]["text"] != "":
-            show_win_screen(buttons[0][j]["text"])
-            return
+            return buttons[0][j]["text"]
 
     # Check diagonals
     if buttons[0][0]["text"] == buttons[1][1]["text"] == buttons[2][2]["text"] != "":
-        show_win_screen(buttons[0][0]["text"])
-        return
+        return buttons[0][0]["text"]
 
     if buttons[0][2]["text"] == buttons[1][1]["text"] == buttons[2][0]["text"] != "":
-        show_win_screen(buttons[0][2]["text"])
-        return
+        return buttons[0][2]["text"]
 
     # Check for a tie
-    if moves == 9:
-        show_tie_screen()
-        return
+    if all(button["text"] != "" for row in buttons for button in row):
+        return "tie"
+
+    return None
 
 def show_win_screen(winner):
-    messagebox.showinfo("Game Over", f"Player {winner} wins!")
-    window.destroy()
-
-def show_tie_screen():
-    messagebox.showinfo("Game Over", "It's a tie!")
+    if winner != "tie":
+        messagebox.showinfo("Game Over", f"Player {winner} wins!")
+    else:
+        messagebox.showinfo("Game Over", "It's a tie!")
     window.destroy()
 
 # Bind button click event to the button_click function
