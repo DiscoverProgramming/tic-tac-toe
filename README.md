@@ -40,7 +40,7 @@ This is a simple Tic Tac Toe game implemented using Python's Tkinter library. Th
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Unlicense License. See the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgements
 
