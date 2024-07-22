@@ -1,1 +1,1 @@
-A tic tac toe game against a bot that is hard to beat.
+A fun little project using tkinter.
